@@ -10,9 +10,9 @@ import Foundation
 
 protocol Statable {
     associatedtype StateType
-    associatedtype StateUnit
+    associatedtype StatePredicate
     
-    var stateUnits: [StateUnit] { get }
+    var stateUnits: [StatePredicate] { get }
     var state: StateType { get } // ? not required
     
     func apply(_ state: StateType)
@@ -24,7 +24,7 @@ extension Statable {
     }
 }
 
-protocol StateUnit/*: Equatable*/ {
+protocol StatePredicate/*: Equatable*/ {
     //    associatedtype StateType
     associatedtype EvaluatedObject: Statable
     //    var state: StateType { get }

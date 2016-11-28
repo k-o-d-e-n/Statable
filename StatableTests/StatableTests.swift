@@ -9,14 +9,14 @@
 import XCTest
 @testable import Statable
 
-struct PrinterState: StateUnit, StateApplier {
+struct PrinterState: StatePredicate, StateApplier {
     typealias EvaluatedObject = StatablePrinter
     typealias ApplyObject = StatablePrinter
     let value: () -> String
-    let evaluateFunction: (_: StatablePrinter) -> Bool
+    let predicate: (_: StatablePrinter) -> Bool
     
     func evaluate(_ object: StatablePrinter) -> Bool {
-        return evaluateFunction(object)
+        return predicate(object)
     }
     
     func apply(_ object: StatablePrinter) {
@@ -29,7 +29,7 @@ class StatablePrinter: Statable {
     var boolState: Bool = false { didSet { applyCurrentState() } }
     var printFunction: (() -> String)? = nil
     var stateUnits = [PrinterState]()
-    var defaultState = PrinterState(value: { return "default state" }, evaluateFunction: { object in object.boolState == false && object.printFunction == nil })
+    var defaultState = PrinterState(value: { return "default state" }, predicate: { object in object.boolState == false && object.printFunction == nil })
     var state: PrinterState {
         return stateUnits.first { $0.evaluate(self) } ?? defaultState
     }
@@ -64,20 +64,20 @@ struct ObjectModePart: StateApplier {
 
 typealias ModeIdentifier = Int
 
-class ObjectMode: StateUnit, StateApplier {
+class ObjectMode: StatePredicate, StateApplier {
     typealias EvaluatedObject = ModdableObject
     typealias ApplyObject = ModdableObject
-    let evaluateFunction: (_: ModdableObject) -> Bool
+    let predicate: (_: ModdableObject) -> Bool
     private var modeParts = [ObjectModePart]()
     var identifier: ModeIdentifier
 
     init(identifier id: Int, evaluateFunction function: @escaping (_: ModdableObject) -> Bool) {
-        evaluateFunction = function
+        predicate = function
         identifier = id
     }
     
     func evaluate(_ object: ModdableObject) -> Bool {
-        return evaluateFunction(object)
+        return predicate(object)
     }
     
     func apply(_ object: ModdableObject) {
@@ -153,8 +153,8 @@ class StatableTests: XCTestCase {
         
         XCTAssertTrue(statable.printFunction?() == "default state")
         
-        statable.stateUnits.append(PrinterState(value: { return "bool is true" }, evaluateFunction: { $0.boolState == true }))
-        statable.stateUnits.append(PrinterState(value: { return "bool is false" }, evaluateFunction: { $0.boolState == false }))
+        statable.stateUnits.append(PrinterState(value: { return "bool is true" }, predicate: { $0.boolState == true }))
+        statable.stateUnits.append(PrinterState(value: { return "bool is false" }, predicate: { $0.boolState == false }))
         
         statable.boolState = true
         XCTAssertTrue(statable.printFunction?() == "bool is true")
