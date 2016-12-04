@@ -8,32 +8,92 @@
 
 import Foundation
 
-protocol Statable {
+// MARK: Statable
+
+protocol AnonymStatable {
     associatedtype StateType
-    associatedtype StatePredicate
+    associatedtype Factor: Predicate
     
-    var stateUnits: [StatePredicate] { get }
-    var state: StateType { get } // ? not required
+    var factors: [Factor] { get }
     
-    func apply(_ state: StateType)
+    func apply(state: StateType)
+}
+
+protocol Statable: AnonymStatable {
+    var state: StateType { get }
 }
 
 extension Statable {
     func applyCurrentState() {
-        apply(state)
+        apply(state: state)
     }
 }
 
-protocol StatePredicate/*: Equatable*/ {
-    //    associatedtype StateType
-    associatedtype EvaluatedObject: Statable
-    //    var state: StateType { get }
-    
-    func evaluate(_ object: EvaluatedObject) -> Bool
+/*!
+ func applyCurrentState() {
+    let currentState = state
+    if (oldState == currentState) return
+ 
+    super.applyCurrentState()
+ }
+ */
+protocol KnownStatable: Statable {
+    var comparedState: StateType { get }
 }
 
-protocol StateApplier {
-    associatedtype ApplyObject: Statable
+// MARK: Predicates
+
+protocol Predicate {
+    associatedtype EvaluatedEntity
     
-    func apply(_ object: ApplyObject)
+    func evaluate(with entity: EvaluatedEntity) -> Bool
+}
+
+protocol StateFactor: Predicate {
+    associatedtype StateType
+    
+    func mark(state: inout StateType)
+}
+
+extension StateFactor {
+    func mark(state: inout StateType, ifEvaluatedWith entity: EvaluatedEntity) {
+        if evaluate(with: entity) {
+            mark(state: &state)
+        }
+    }
+}
+
+protocol StateDescriptor: Predicate {
+    var state: EvaluatedEntity { get }
+    
+    func evaluate(with entity: EvaluatedEntity) -> Bool
+}
+
+// MARK: State Appliers
+
+protocol StateApplier {
+    associatedtype ApplyTarget
+    
+    func apply(for target: ApplyTarget)
+}
+
+protocol StatesApplier {
+    associatedtype StateType
+    associatedtype ApplyTarget
+    
+    func apply(state: StateType, for target: ApplyTarget)
+}
+
+// MARK: Subscribers
+
+protocol StateSubscriber: Predicate {
+    func invoke()
+}
+
+extension StateSubscriber {
+    func invoke(ifMatched entity: EvaluatedEntity) {
+        if evaluate(with: entity) {
+            invoke()
+        }
+    }
 }

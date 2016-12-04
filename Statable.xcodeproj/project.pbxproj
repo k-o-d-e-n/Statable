@@ -15,6 +15,7 @@
 		A46F314A1DE259E2006C70A2 /* StatableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A46F31491DE259E2006C70A2 /* StatableTests.swift */; };
 		A46F31551DE259E2006C70A2 /* StatableUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A46F31541DE259E2006C70A2 /* StatableUITests.swift */; };
 		A46F31641DE25A07006C70A2 /* Statable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A46F31631DE25A07006C70A2 /* Statable.swift */; };
+		A4DA7B241DF351FB00B1A279 /* StatableSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4DA7B231DF351FB00B1A279 /* StatableSupport.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		A46F31541DE259E2006C70A2 /* StatableUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatableUITests.swift; sourceTree = "<group>"; };
 		A46F31561DE259E2006C70A2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A46F31631DE25A07006C70A2 /* Statable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Statable.swift; sourceTree = "<group>"; };
+		A4DA7B231DF351FB00B1A279 /* StatableSupport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatableSupport.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -132,6 +134,7 @@
 			isa = PBXGroup;
 			children = (
 				A46F31631DE25A07006C70A2 /* Statable.swift */,
+				A4DA7B231DF351FB00B1A279 /* StatableSupport.swift */,
 			);
 			name = Statable;
 			sourceTree = "<group>";
@@ -271,6 +274,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A46F31371DE259E2006C70A2 /* ViewController.swift in Sources */,
+				A4DA7B241DF351FB00B1A279 /* StatableSupport.swift in Sources */,
 				A46F31351DE259E2006C70A2 /* AppDelegate.swift in Sources */,
 				A46F31641DE25A07006C70A2 /* Statable.swift in Sources */,
 			);
@@ -517,6 +521,7 @@
 				A46F315B1DE259E2006C70A2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		A46F315C1DE259E2006C70A2 /* Build configuration list for PBXNativeTarget "StatableTests" */ = {
 			isa = XCConfigurationList;
@@ -525,6 +530,7 @@
 				A46F315E1DE259E2006C70A2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		A46F315F1DE259E2006C70A2 /* Build configuration list for PBXNativeTarget "StatableUITests" */ = {
 			isa = XCConfigurationList;
@@ -533,6 +539,7 @@
 				A46F31611DE259E2006C70A2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

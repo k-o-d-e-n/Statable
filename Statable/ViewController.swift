@@ -41,15 +41,15 @@ enum TrafficLightElement {
 
 }
 
-enum TrafficLightElementState: StatePredicate {
+enum TrafficLightElementState: Predicate {
     case enabled
     case disabled
     case transition
     
     typealias EvaluatedObject = TrafficLightElementView
     
-    func evaluate(_ object: TrafficLightElementView) -> Bool {
-        return self == object.state
+    func evaluate(with entity: TrafficLightElementView) -> Bool {
+        return self == entity.state
     }
     
 }
@@ -60,7 +60,7 @@ class TrafficLightElementView: UIView, Statable, StateApplier {
     typealias StatePredicate = TrafficLightElementState
     
     var state: TrafficLightElementState = .disabled { didSet { applyCurrentState() } }
-    var stateUnits: [TrafficLightElementState] = [.enabled, .disabled, .transition]
+    var factors: [TrafficLightElementState] = [.enabled, .disabled, .transition]
     let element: TrafficLightElement
     let transitionBehavior: TrafficLightElementTransitionBehavior
     
@@ -74,11 +74,11 @@ class TrafficLightElementView: UIView, Statable, StateApplier {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func apply(_ state: TrafficLightElementState) {
-        apply(self)
+    func apply(state: TrafficLightElementState) {
+        apply(for: self)
     }
     
-    func apply(_ object: TrafficLightElementView) {
+    func apply(for object: TrafficLightElementView) {
         object.layer.removeAllAnimations()
         switch object.state {
         case .enabled:
@@ -125,17 +125,17 @@ enum TrafficLightState {
     
 }
 
-struct TrafficLightStatePredicate: StatePredicate, StateApplier {
+struct TrafficLightStatePredicate: Predicate, StateApplier {
     typealias EvaluatedObject = TrafficLightView
     typealias ApplyObject = TrafficLightView
     let state: TrafficLightState
     let applyTime: TimeInterval
     
-    func evaluate(_ object: TrafficLightView) -> Bool {
+    func evaluate(with object: TrafficLightView) -> Bool {
         return state == object.state
     }
     
-    func apply(_ object: TrafficLightView) {
+    func apply(for object: TrafficLightView) {
         object.greenElement.state = state.stateFor(element: object.greenElement.element)
         object.yellowElement.state = state.stateFor(element: object.yellowElement.element)
         object.redElement.state = state.stateFor(element: object.redElement.element)
@@ -146,26 +146,58 @@ struct TrafficLightStatePredicate: StatePredicate, StateApplier {
     
 }
 
+class Automobile: StateSubscriber, Hashable {
+    typealias EvaluatedEntity = TrafficLightState
+    
+    let name: String
+    weak var trafficLight: TrafficLightView?
+    var hashValue: Int { return name.characters.count }
+    
+    init(name: String) {
+        self.name = name
+    }
+    
+    func invoke() {
+        trafficLight?.state != .red ? print("\(name) drove") : print("\(name) stopped")
+    }
+    
+    func evaluate(with entity: TrafficLightState) -> Bool {
+        return entity == .green || entity == .red
+    }
+    
+    static func ==(lhs: Automobile, rhs: Automobile) -> Bool {
+        return lhs == rhs
+    }
+}
+
 class TrafficLightView: UIView, Statable {
     typealias StateType = TrafficLightState
     typealias StatePredicate = TrafficLightStatePredicate
     
-    var stateUnits = [TrafficLightStatePredicate]()
-    var state: TrafficLightState = .green
+    var factors = [TrafficLightStatePredicate]()
+    var state: TrafficLightState = .green {
+        didSet {
+            for waitedAuto in trafficJam {
+                waitedAuto.invoke(ifMatched: state)
+            }
+        }
+    }
     weak var greenElement: TrafficLightElementView!
     weak var yellowElement: TrafficLightElementView!
     weak var redElement: TrafficLightElementView!
+    
+    var trafficJam = [Automobile]()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         
         self.layer.borderWidth = 2
         
-        stateUnits.append(TrafficLightStatePredicate(state: .green, applyTime: 5))
-        stateUnits.append(TrafficLightStatePredicate(state: .blinkingGreen, applyTime: 3))
-        stateUnits.append(TrafficLightStatePredicate(state: .yellow, applyTime: 2))
-        stateUnits.append(TrafficLightStatePredicate(state: .yellowRed, applyTime: 2))
-        stateUnits.append(TrafficLightStatePredicate(state: .red, applyTime: 5))
+        factors.append(TrafficLightStatePredicate(state: .green, applyTime: 5))
+        factors.append(TrafficLightStatePredicate(state: .blinkingGreen, applyTime: 3))
+        factors.append(TrafficLightStatePredicate(state: .yellow, applyTime: 2))
+        factors.append(TrafficLightStatePredicate(state: .yellowRed, applyTime: 2))
+        factors.append(TrafficLightStatePredicate(state: .red, applyTime: 5))
         
         setupElements()
     }
@@ -198,8 +230,20 @@ class TrafficLightView: UIView, Statable {
         applyCurrentState()
     }
     
-    func apply(_ state: TrafficLightState) {
-        stateUnits.first { $0.evaluate(self) }?.apply(self)
+    func apply(state: TrafficLightState) {
+        factors.first { $0.evaluate(with: self) }?.apply(for: self)
+    }
+    
+    func addWaiting(auto: Automobile) {
+        auto.trafficLight = self
+        trafficJam.append(auto)
+    }
+    
+    func removeWaiting(auto: Automobile) {
+        auto.trafficLight = nil
+        if let index = trafficJam.index(where: { $0 == auto }) {
+            trafficJam.remove(at: index)
+        }
     }
     
     func run() {
@@ -210,6 +254,7 @@ class TrafficLightView: UIView, Statable {
 
 class ViewController: UIViewController {
     weak var trafficLight: TrafficLightView!
+    let velocity: TimeInterval = 0.4
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -217,6 +262,7 @@ class ViewController: UIViewController {
         let light = TrafficLightView(frame: CGRect(x: view.frame.midX - 52, y: 100, width: 104, height: 306))
         view.addSubview(light)
         trafficLight = light
+        trafficLight.addWaiting(auto: Automobile(name: "Plymouth Hemicuda 1970"))
     }
 
     override func viewDidAppear(_ animated: Bool) {

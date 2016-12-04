@@ -9,39 +9,43 @@
 import XCTest
 @testable import Statable
 
-struct PrinterState: StatePredicate, StateApplier {
+struct PrinterState: Predicate, StateApplier {
     typealias EvaluatedObject = StatablePrinter
     typealias ApplyObject = StatablePrinter
+    
     let value: () -> String
     let predicate: (_: StatablePrinter) -> Bool
     
-    func evaluate(_ object: StatablePrinter) -> Bool {
-        return predicate(object)
+    func evaluate(with entity: StatablePrinter) -> Bool {
+        return predicate(entity)
     }
     
-    func apply(_ object: StatablePrinter) {
-        object.printFunction = value
+    func apply(for target: StatablePrinter) {
+        target.printFunction = value
     }
 }
 
 class StatablePrinter: Statable {
     typealias StateUnit = PrinterState
+    typealias StateType = PrinterState
+    
     var boolState: Bool = false { didSet { applyCurrentState() } }
     var printFunction: (() -> String)? = nil
-    var stateUnits = [PrinterState]()
+    var factors = [PrinterState]()
     var defaultState = PrinterState(value: { return "default state" }, predicate: { object in object.boolState == false && object.printFunction == nil })
     var state: PrinterState {
-        return stateUnits.first { $0.evaluate(self) } ?? defaultState
+        return factors.first { $0.evaluate(with: self) } ?? defaultState
     }
     
-    func apply(_ state: PrinterState) {
-        state.apply(self)
+    func apply(state: PrinterState) {
+        state.apply(for: self)
     }
     
 }
 
 struct ObjectModePart: StateApplier {
     typealias ApplyObject = ModdableObject
+    
     let applyFunction: (ModdableObject) -> ()
     var mode: ObjectMode? = nil
     
@@ -49,24 +53,25 @@ struct ObjectModePart: StateApplier {
         applyFunction = function
     }
     
-    func apply(_ object: ModdableObject) {
-        applyFunction(object)
+    func apply(for target: ModdableObject) {
+        applyFunction(target)
     }
     
     func applyIfNeeded(_ object: ModdableObject) {
         guard let owner = mode else { return }
         
-        if owner.evaluate(object) {
-            apply(object)
+        if owner.evaluate(with: object) {
+            apply(for: object)
         }
     }
 }
 
 typealias ModeIdentifier = Int
 
-class ObjectMode: StatePredicate, StateApplier {
+class ObjectMode: Predicate, StateApplier {
     typealias EvaluatedObject = ModdableObject
     typealias ApplyObject = ModdableObject
+    
     let predicate: (_: ModdableObject) -> Bool
     private var modeParts = [ObjectModePart]()
     var identifier: ModeIdentifier
@@ -76,19 +81,19 @@ class ObjectMode: StatePredicate, StateApplier {
         identifier = id
     }
     
-    func evaluate(_ object: ModdableObject) -> Bool {
-        return predicate(object)
+    func evaluate(with entity: ModdableObject) -> Bool {
+        return predicate(entity)
     }
     
-    func apply(_ object: ModdableObject) {
+    func apply(for target: ModdableObject) {
         for part in modeParts {
-            part.apply(object)
+            part.apply(for: target)
         }
     }
     
-    func applyIfNeeded(_ object: ModdableObject) {
-        if evaluate(object) {
-            apply(object)
+    func applyIfNeeded(for target: ModdableObject) {
+        if evaluate(with: target) {
+            apply(for: target)
         }
     }
     
@@ -101,24 +106,25 @@ class ObjectMode: StatePredicate, StateApplier {
 class ModdableObject: Statable {
     typealias StateType = Int
     typealias StateUnit = ObjectMode
+    
     var state: ModeIdentifier = 0 { didSet { applyCurrentState() } }
-    internal var stateUnits = [ObjectMode]()
+    internal var factors = [ObjectMode]()
     
     // moddable properties
     internal var commands = [String]()
     internal var modeName: String?
     
-    func apply(_ state: ModeIdentifier) {
-        stateUnits.first { $0.evaluate(self) }?.apply(self)
+    func apply(state: ModeIdentifier) {
+        factors.first { $0.evaluate(with: self) }?.apply(for: self)
     }
     
     func register(mode: ObjectMode) {
-        stateUnits.append(mode)
+        factors.append(mode)
     }
     
     func add(part: ObjectModePart, for mode: ModeIdentifier) {
         var mutablePart = part
-        stateUnits.first { $0.identifier == mode }?.add(&mutablePart)
+        factors.first { $0.identifier == mode }?.add(&mutablePart)
         mutablePart.applyIfNeeded(self)
     }
 }
@@ -153,8 +159,8 @@ class StatableTests: XCTestCase {
         
         XCTAssertTrue(statable.printFunction?() == "default state")
         
-        statable.stateUnits.append(PrinterState(value: { return "bool is true" }, predicate: { $0.boolState == true }))
-        statable.stateUnits.append(PrinterState(value: { return "bool is false" }, predicate: { $0.boolState == false }))
+        statable.factors.append(PrinterState(value: { return "bool is true" }, predicate: { $0.boolState == true }))
+        statable.factors.append(PrinterState(value: { return "bool is false" }, predicate: { $0.boolState == false }))
         
         statable.boolState = true
         XCTAssertTrue(statable.printFunction?() == "bool is true")
