@@ -10,7 +10,7 @@ import Foundation
 
 // MARK: Statable
 
-protocol AnonymStatable {
+public protocol AnonymStatable {
     associatedtype StateType
     associatedtype Factor: Predicate
     
@@ -19,43 +19,43 @@ protocol AnonymStatable {
     func apply(state: StateType)
 }
 
-protocol Statable: AnonymStatable {
+public protocol Statable: AnonymStatable {
     var state: StateType { get }
 }
 
-extension Statable {
+public extension Statable {
     func applyCurrentState() {
         apply(state: state)
     }
 }
 
 /*!
- func applyCurrentState() {
-    let currentState = state
-    if (oldState == currentState) return
- 
-    super.applyCurrentState()
- }
+     override func applyCurrentState() {
+        let currentState = state
+        if (oldState == currentState) return
+     
+        super.applyCurrentState()
+     }
  */
-protocol KnownStatable: Statable {
-    var comparedState: StateType { get }
+public protocol KnownStatable: Statable {
+    var lastAppliedState: StateType { get }
 }
 
 // MARK: Predicates
 
-protocol Predicate {
+public protocol Predicate {
     associatedtype EvaluatedEntity
     
     func evaluate(with entity: EvaluatedEntity) -> Bool
 }
 
-protocol StateFactor: Predicate {
+public protocol StateFactor: Predicate {
     associatedtype StateType
     
     func mark(state: inout StateType)
 }
 
-extension StateFactor {
+public extension StateFactor {
     func mark(state: inout StateType, ifEvaluatedWith entity: EvaluatedEntity) {
         if evaluate(with: entity) {
             mark(state: &state)
@@ -63,7 +63,7 @@ extension StateFactor {
     }
 }
 
-protocol StateDescriptor: Predicate {
+public protocol StateDescriptor: Predicate {
     var state: EvaluatedEntity { get }
     
     func evaluate(with entity: EvaluatedEntity) -> Bool
@@ -71,13 +71,13 @@ protocol StateDescriptor: Predicate {
 
 // MARK: State Appliers
 
-protocol StateApplier {
+public protocol StateApplier {
     associatedtype ApplyTarget
     
     func apply(for target: ApplyTarget)
 }
 
-protocol StatesApplier {
+public protocol StatesApplier {
     associatedtype StateType
     associatedtype ApplyTarget
     
@@ -86,11 +86,11 @@ protocol StatesApplier {
 
 // MARK: Subscribers
 
-protocol StateSubscriber: Predicate {
+public protocol StateSubscriber: Predicate {
     func invoke()
 }
 
-extension StateSubscriber {
+public extension StateSubscriber {
     func invoke(ifMatched entity: EvaluatedEntity) {
         if evaluate(with: entity) {
             invoke()
