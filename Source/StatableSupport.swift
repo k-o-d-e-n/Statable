@@ -9,24 +9,24 @@
 import Foundation
 
 // issue: does not conform Predicate protocol, this is expirement
-class QNSPredicate<Evaluated: AnonymStatable>: NSPredicate {
+open class QNSPredicate<Evaluated: AnonymStatable>: NSPredicate {
     typealias EvaluatedEntity = Evaluated
 }
 
 extension NSPredicate: Predicate {
-    typealias EvaluatedEntity = Any?
+    public typealias EvaluatedEntity = Any?
 }
 
-class BlockPredicate<Evaluated>: Predicate {
-    typealias EvaluatedEntity = Evaluated
+open class BlockPredicate<Evaluated>: Predicate {
+    public typealias EvaluatedEntity = Evaluated
     
-    let predicate: (_ object: Evaluated) -> Bool
+    internal let predicate: (_ object: Evaluated) -> Bool
     
-    init(predicate: @escaping (_ object: Evaluated) -> Bool) {
+    public init(predicate: @escaping (_ object: Evaluated) -> Bool) {
         self.predicate = predicate
     }
     
-    func evaluate(with object: Evaluated) -> Bool {
+    public func evaluate(with object: Evaluated) -> Bool {
         return predicate(object)
     }
 }

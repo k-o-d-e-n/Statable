@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "A46F31301DE259E2006C70A2"
-               BuildableName = "Statable.app"
-               BlueprintName = "Statable"
-               ReferencedContainer = "container:Statable.xcodeproj">
+               BuildableName = "StatableExample.app"
+               BlueprintName = "StatableExample"
+               ReferencedContainer = "container:StatableExample.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "A46F31441DE259E2006C70A2"
-               BuildableName = "StatableTests.xctest"
-               BlueprintName = "StatableTests"
-               ReferencedContainer = "container:Statable.xcodeproj">
+               BuildableName = "StatableExampleTests.xctest"
+               BlueprintName = "StatableExampleTests"
+               ReferencedContainer = "container:StatableExample.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -43,9 +43,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "A46F314F1DE259E2006C70A2"
-               BuildableName = "StatableUITests.xctest"
-               BlueprintName = "StatableUITests"
-               ReferencedContainer = "container:Statable.xcodeproj">
+               BuildableName = "StatableExampleUITests.xctest"
+               BlueprintName = "StatableExampleUITests"
+               ReferencedContainer = "container:StatableExample.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -53,9 +53,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "A46F31301DE259E2006C70A2"
-            BuildableName = "Statable.app"
-            BlueprintName = "Statable"
-            ReferencedContainer = "container:Statable.xcodeproj">
+            BuildableName = "StatableExample.app"
+            BlueprintName = "StatableExample"
+            ReferencedContainer = "container:StatableExample.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -76,9 +76,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "A46F31301DE259E2006C70A2"
-            BuildableName = "Statable.app"
-            BlueprintName = "Statable"
-            ReferencedContainer = "container:Statable.xcodeproj">
+            BuildableName = "StatableExample.app"
+            BlueprintName = "StatableExample"
+            ReferencedContainer = "container:StatableExample.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -95,9 +95,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "A46F31301DE259E2006C70A2"
-            BuildableName = "Statable.app"
-            BlueprintName = "Statable"
-            ReferencedContainer = "container:Statable.xcodeproj">
+            BuildableName = "StatableExample.app"
+            BlueprintName = "StatableExample"
+            ReferencedContainer = "container:StatableExample.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Statable
 
 enum TrafficLightElementTransitionBehavior {
     case light
