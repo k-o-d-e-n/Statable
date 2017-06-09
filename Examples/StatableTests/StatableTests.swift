@@ -43,18 +43,20 @@ class StatablePrinter: Statable {
     
 }
 
-struct ObjectModePart: StateApplier {
+struct ObjectModePart<Associated>: StateApplier {
     typealias ApplyObject = ModdableObject
     
-    let applyFunction: (ModdableObject) -> ()
+    let applyFunction: (ModdableObject, Associated) -> ()
+    let associatedValues: Associated
     var mode: ObjectMode? = nil
     
-    init(applyFunction function: @escaping (ModdableObject) -> ()) {
+    init(applyFunction function: @escaping (ModdableObject, Associated) -> (), associatedValues: Associated) {
         applyFunction = function
+        self.associatedValues = associatedValues
     }
     
     func apply(for target: ModdableObject) {
-        applyFunction(target)
+        applyFunction(target, associatedValues)
     }
     
     func applyIfNeeded(_ object: ModdableObject) {
@@ -73,7 +75,7 @@ class ObjectMode: Predicate, StateApplier {
     typealias ApplyObject = ModdableObject
     
     let predicate: (_: ModdableObject) -> Bool
-    private var modeParts = [ObjectModePart]()
+    private var modeParts = [ObjectModePart<ModdableObjectParams>]()
     var identifier: ModeIdentifier
 
     init(identifier id: Int, evaluateFunction function: @escaping (_: ModdableObject) -> Bool) {
@@ -97,10 +99,15 @@ class ObjectMode: Predicate, StateApplier {
         }
     }
     
-    func add(_ part: inout ObjectModePart) {
+    func add(_ part: inout ObjectModePart<ModdableObjectParams>) {
         part.mode = self
         modeParts.append(part)
     }
+}
+
+struct ModdableObjectParams {
+    let commands: [String]
+    let modeName: String
 }
 
 class ModdableObject: Statable {
@@ -122,7 +129,7 @@ class ModdableObject: Statable {
         factors.append(mode)
     }
     
-    func add(part: ObjectModePart, for mode: ModeIdentifier) {
+    func add(part: ObjectModePart<ModdableObjectParams>, for mode: ModeIdentifier) {
         var mutablePart = part
         factors.first { $0.identifier == mode }?.add(&mutablePart)
         mutablePart.applyIfNeeded(self)
@@ -179,14 +186,13 @@ class StatableTests: XCTestCase {
         moddable.applyCurrentState()
         XCTAssertTrue(moddable.commands.count == 0)
         
-        moddable.add(part: ObjectModePart(applyFunction: { $0.commands = ["add", "remove"] } ), for: CollectionManager)
+        let applyMode: (ModdableObject, ModdableObjectParams) -> Void = { $0.commands = $1.commands; $0.modeName = $1.modeName }
+        moddable.add(part: ObjectModePart(applyFunction: applyMode, associatedValues: ModdableObjectParams(commands: ["add", "remove"], modeName: "CollectionManager")), for: CollectionManager)
         XCTAssertTrue(moddable.commands == ["add", "remove"])
         
-        moddable.add(part: ObjectModePart(applyFunction: { $0.commands = ["write", "read"] }), for: DataManager)
+        moddable.add(part: ObjectModePart(applyFunction: applyMode, associatedValues: ModdableObjectParams(commands: ["write", "read"], modeName: "DataManager")), for: DataManager)
         XCTAssertTrue(moddable.commands == ["add", "remove"])
         
-        moddable.add(part: ObjectModePart(applyFunction: { $0.modeName = "CollectionManager" }), for: CollectionManager)
-        moddable.add(part: ObjectModePart(applyFunction: { $0.modeName = "DataManager" }), for: DataManager)
         moddable.state = DataManager
         XCTAssertTrue(moddable.commands == ["write", "read"])
         XCTAssertTrue(moddable.modeName == "DataManager")

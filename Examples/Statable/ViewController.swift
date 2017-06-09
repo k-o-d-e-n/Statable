@@ -124,6 +124,16 @@ enum TrafficLightState {
         }
     }
     
+    var automobileState: AutomobileState {
+        switch self {
+        case .green: return .drive
+        case .blinkingGreen: return .drive
+        case .yellow: return .stopped
+        case .yellowRed: return .stopped
+        case .red: return .stopped
+        }
+    }
+    
 }
 
 struct TrafficLightStatePredicate: Predicate, StateApplier {
@@ -147,11 +157,38 @@ struct TrafficLightStatePredicate: Predicate, StateApplier {
     
 }
 
-class Automobile: StateSubscriber, Hashable {
+enum AutomobileState: Predicate, StateApplier {
+    typealias EvaluatedEntity = Automobile
+    typealias ApplyTarget = Automobile
+    
+    case drive
+    case stopped
+    
+    func evaluate(with entity: Automobile) -> Bool {
+        return self == entity.state
+    }
+    
+    func apply(for target: Automobile) {
+        switch target.state {
+        case .drive:
+            target.view.frame.origin.y += 2
+        case .stopped:
+            break
+        }
+    }
+}
+
+class Automobile: StateSubscriber, Hashable, Statable {
+    typealias StateType = AutomobileState
+    typealias Factor = AutomobileState
     typealias EvaluatedEntity = TrafficLightState
+    
+    var factors: [AutomobileState] = [.drive, .stopped]
+    var state: AutomobileState = .stopped
     
     let name: String
     weak var trafficLight: TrafficLightView?
+    weak var view: AutomobileView!
     var hashValue: Int { return name.characters.count }
     
     init(name: String) {
@@ -159,11 +196,25 @@ class Automobile: StateSubscriber, Hashable {
     }
     
     func invoke() {
-        trafficLight?.state != .red ? print("\(name) drove") : print("\(name) stopped")
+        switch trafficLight!.state.automobileState {
+        case .drive:
+            print("\(name) drove")
+            view.frame.origin.y += 5
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) {
+                self.invoke()
+            }
+        default:
+            print("\(name) stopped")
+        }
     }
     
+    func apply(state: AutomobileState) {
+        state.apply(for: self)
+    }
+    
+    /// evaluate for notify (call invoke() function)
     func evaluate(with entity: TrafficLightState) -> Bool {
-        return entity == .green || entity == .red
+        return entity.automobileState != state
     }
     
     static func ==(lhs: Automobile, rhs: Automobile) -> Bool {
@@ -192,7 +243,7 @@ class TrafficLightView: UIView, Statable {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        self.layer.borderWidth = 2
+        layer.borderWidth = 2
         
         factors.append(TrafficLightStatePredicate(state: .green, applyTime: 5))
         factors.append(TrafficLightStatePredicate(state: .blinkingGreen, applyTime: 3))
@@ -207,9 +258,9 @@ class TrafficLightView: UIView, Statable {
         let green = TrafficLightElementView(frame: .zero, element: .green, transition: .blink)
         let yellow = TrafficLightElementView(frame: .zero, element: .yellow, transition: .light)
         let red = TrafficLightElementView(frame: .zero, element: .red, transition: .light)
-        self.addSubview(green); greenElement = green
-        self.addSubview(yellow); yellowElement = yellow
-        self.addSubview(red); redElement = red
+        addSubview(green); greenElement = green
+        addSubview(yellow); yellowElement = yellow
+        addSubview(red); redElement = red
     }
     
     override func layoutSubviews() {
@@ -227,7 +278,7 @@ class TrafficLightView: UIView, Statable {
     }
     
     func applyNext() {
-        self.state = state.next
+        state = state.next
         applyCurrentState()
     }
     
@@ -250,12 +301,21 @@ class TrafficLightView: UIView, Statable {
     func run() {
         applyCurrentState()
     }
-    
+}
+
+extension TrafficLightView: CAAnimationDelegate {
+    func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
+        if flag {
+            layer.frame = layer.presentation()!.frame.integral
+            layer.removeAnimation(forKey: "animation")
+        }
+    }
 }
 
 class ViewController: UIViewController {
     weak var trafficLight: TrafficLightView!
     let velocity: TimeInterval = 0.4
+    static let automobiles = ["Plymouth Hemicuda 1970", "Plymouth Hemicuda 1971", "Plymouth Hemicuda 1972", "Plymouth Hemicuda 1973", "Plymouth Hemicuda 1974", "Plymouth Hemicuda 1975"]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -263,7 +323,14 @@ class ViewController: UIViewController {
         let light = TrafficLightView(frame: CGRect(x: view.frame.midX - 52, y: 100, width: 104, height: 306))
         view.addSubview(light)
         trafficLight = light
-        trafficLight.addWaiting(auto: Automobile(name: "Plymouth Hemicuda 1970"))
+        let automobiles = ViewController.automobiles.map { Automobile(name: $0) }
+        automobiles.forEach {
+            let view = AutomobileView(auto: $0)
+            view.frame = CGRect(origin: CGPoint(x: 0, y: 0 - (trafficLight.trafficJam.count * 21)), size: CGSize(width: 150, height: 20))
+            self.view.addSubview(view)
+            $0.view = view
+            trafficLight.addWaiting(auto: $0)
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -271,5 +338,42 @@ class ViewController: UIViewController {
         trafficLight.run()
     }
 
+}
+
+class AutomobileView: UIView {
+    private weak var titleLabel: UILabel!
+    var auto: Automobile! {
+        didSet { titleLabel.text = auto.name }
+    }
+        
+    convenience init(auto: Automobile) {
+        self.init(frame: .zero)
+        self.auto = auto
+        titleLabel.text = auto.name
+    }
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        layer.borderWidth = 1
+        loadTitleLabel()
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        titleLabel.frame = bounds
+    }
+    
+    func loadTitleLabel() {
+        let label = UILabel()
+        label.numberOfLines = 0
+        label.font = UIFont.systemFont(ofSize: 10)
+        label.textAlignment = .center
+        addSubview(label)
+        self.titleLabel = label
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
 
