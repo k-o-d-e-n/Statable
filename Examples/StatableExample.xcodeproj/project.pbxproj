@@ -16,6 +16,7 @@
 		A46F313F1DE259E2006C70A2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A46F313D1DE259E2006C70A2 /* LaunchScreen.storyboard */; };
 		A46F314A1DE259E2006C70A2 /* StatableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A46F31491DE259E2006C70A2 /* StatableTests.swift */; };
 		A46F31551DE259E2006C70A2 /* StatableUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A46F31541DE259E2006C70A2 /* StatableUITests.swift */; };
+		A4DC6D43200B923700C0798C /* Statable.podspec in Resources */ = {isa = PBXBuildFile; fileRef = A4DC6D42200B923700C0798C /* Statable.podspec */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 		A46F31501DE259E2006C70A2 /* StatableExampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StatableExampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A46F31541DE259E2006C70A2 /* StatableUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatableUITests.swift; sourceTree = "<group>"; };
 		A46F31561DE259E2006C70A2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A4DC6D42200B923700C0798C /* Statable.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Statable.podspec; path = ../../Statable.podspec; sourceTree = "<group>"; };
 		AA1D764C5B4DB3ED156AE0D9 /* Pods_Statable.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Statable.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA494A2A46B0151C2E712B66 /* Pods-StatableExample-StatableExampleTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StatableExample-StatableExampleTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-StatableExample-StatableExampleTests/Pods-StatableExample-StatableExampleTests.debug.xcconfig"; sourceTree = "<group>"; };
 		D70C7819B67A51B90C092EFE /* Pods-StatableExample-StatableExampleTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StatableExample-StatableExampleTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-StatableExample-StatableExampleTests/Pods-StatableExample-StatableExampleTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -125,6 +127,7 @@
 		A46F31331DE259E2006C70A2 /* Statable */ = {
 			isa = PBXGroup;
 			children = (
+				A4DC6D42200B923700C0798C /* Statable.podspec */,
 				A46F31341DE259E2006C70A2 /* AppDelegate.swift */,
 				A46F31361DE259E2006C70A2 /* ViewController.swift */,
 				A46F31381DE259E2006C70A2 /* Main.storyboard */,
@@ -276,6 +279,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A4DC6D43200B923700C0798C /* Statable.podspec in Resources */,
 				A46F313F1DE259E2006C70A2 /* LaunchScreen.storyboard in Resources */,
 				A46F313C1DE259E2006C70A2 /* Assets.xcassets in Resources */,
 				A46F313A1DE259E2006C70A2 /* Main.storyboard in Resources */,

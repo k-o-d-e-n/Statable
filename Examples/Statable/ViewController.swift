@@ -189,7 +189,7 @@ class Automobile: StateSubscriber, Hashable, Statable {
     let name: String
     weak var trafficLight: TrafficLightView?
     weak var view: AutomobileView!
-    var hashValue: Int { return name.characters.count }
+    var hashValue: Int { return name.count }
     
     init(name: String) {
         self.name = name
