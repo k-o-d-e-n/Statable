@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'Statable'
-  s.version          = '0.1.0'
+  s.version          = '0.1.1'
   s.summary          = 'This is set of protocols for implement statable entity.'
 
 # This description is used to generate tags and improve search results.

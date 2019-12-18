@@ -189,8 +189,10 @@ class Automobile: StateSubscriber, Hashable, Statable {
     let name: String
     weak var trafficLight: TrafficLightView?
     weak var view: AutomobileView!
-    var hashValue: Int { return name.count }
-    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(name)
+    }
+
     init(name: String) {
         self.name = name
     }
@@ -218,7 +220,7 @@ class Automobile: StateSubscriber, Hashable, Statable {
     }
     
     static func ==(lhs: Automobile, rhs: Automobile) -> Bool {
-        return lhs == rhs
+        return lhs.name == rhs.name
     }
 }
 
@@ -293,7 +295,7 @@ class TrafficLightView: UIView, Statable {
     
     func removeWaiting(auto: Automobile) {
         auto.trafficLight = nil
-        if let index = trafficJam.index(where: { $0 == auto }) {
+        if let index = trafficJam.firstIndex(where: { $0 == auto }) {
             trafficJam.remove(at: index)
         }
     }
